@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birth Month Wisdom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --glass: rgba(255, 255, 255, 0.18);
+      --glass-strong: rgba(255, 255, 255, 0.28);
+      --ink: #f7fbff;
+      --muted: rgba(255, 255, 255, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: Inter, "Segoe UI", sans-serif;
+      color: var(--ink);
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #0b1a2a;
+    }
+
+    .scene {
+      min-height: 100%;
+      min-height: 100dvh;
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .scene::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(8, 22, 40, 0.28) 0%, rgba(8, 22, 40, 0.08) 38%, rgba(8, 22, 40, 0.45) 100%),
+        url("landscape.jpg") center / cover no-repeat;
+    }
+
+    .frame {
+      position: relative;
+      width: min(430px, 100%);
+      min-height: 100dvh;
+      padding: 28px 24px 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .pill-btn {
+      appearance: none;
+      border: 1px solid rgba(180, 220, 255, 0.55);
+      background: linear-gradient(90deg, #4f8cff, #8b5cff 55%, #c45cff);
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+      padding: 10px 22px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(90, 80, 255, 0.35), 0 0 0 4px rgba(255, 255, 255, 0.06);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .pill-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .pill-btn:active {
+      transform: translateY(1px);
+    }
+
+    .pill-btn.ghost {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.35);
+      box-shadow: none;
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      margin-top: 48px;
+      text-align: center;
+      font-size: clamp(28px, 7vw, 36px);
+      font-weight: 600;
+      line-height: 1.2;
+      text-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    h1 .accent {
+      display: block;
+      background: linear-gradient(90deg, #5ad7ff, #7aa8ff 40%, #d46dff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+
+    .rule {
+      width: 92px;
+      height: 3px;
+      margin: 16px auto 0;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #4fd4ff, #8b6cff, #e06bff);
+    }
+
+    .picker-wrap {
+      position: relative;
+      margin: 36px auto 0;
+      width: min(280px, 100%);
+      flex: 0 0 auto;
+    }
+
+    .wheel {
+      position: relative;
+      height: clamp(192px, 40vh, 320px);
+      overflow: hidden;
+      mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+      touch-action: none;
+    }
+
+    .wheel-list {
+      list-style: none;
+      padding: 128px 0;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .wheel-list li {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--muted);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+      user-select: none;
+    }
+
+    .wheel-list li.active {
+      color: transparent;
+      background: linear-gradient(90deg, #4fd4ff, #7aa8ff, #e06bff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      font-size: 40px;
+      font-weight: 700;
+    }
+
+    .highlight {
+      pointer-events: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 64px;
+      transform: translateY(-50%);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.1));
+      border: 1px solid rgba(180, 220, 255, 0.45);
+      box-shadow: 0 10px 30px rgba(80, 140, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(8px);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      min-height: calc(100dvh - 68px);
+    }
+
+    .screen.visible {
+      display: flex;
+    }
+
+    .highlight {
+      z-index: 0;
+    }
+
+    .wheel-list {
+      position: relative;
+      z-index: 1;
+    }
+
+    .wheel-list li {
+      cursor: pointer;
+    }
+
+    .wisdom-card {
+      margin: auto 0;
+      padding: 28px 24px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(8, 20, 40, 0.28);
+      text-align: center;
+    }
+
+    .month-chip {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .verse {
+      font-size: clamp(20px, 5vw, 26px);
+      line-height: 1.45;
+      font-weight: 600;
+      text-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    .ref {
+      margin-top: 16px;
+      color: #cfe8ff;
+      font-weight: 600;
+    }
+
+    .wisdom {
+      margin-top: 18px;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+  <main class="scene">
+    <div class="frame">
+      <section id="picker-screen" class="screen visible" aria-hidden="false">
+        <h1>
+          What is your
+          <span class="accent">birth month?</span>
+        </h1>
+        <div class="rule"></div>
+        <div class="picker-wrap">
+          <div class="wheel" id="wheel" aria-label="Scroll to choose your birth month">
+            <div class="highlight"></div>
+            <ul class="wheel-list" id="month-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="wisdom-screen" class="screen" hidden aria-hidden="true">
+        <div class="top-row">
+          <button class="pill-btn ghost" id="back-btn" type="button">← Back</button>
+        </div>
+        <h1>
+          A word for
+          <span class="accent" id="wisdom-title">June</span>
+        </h1>
+        <div class="rule"></div>
+        <article class="wisdom-card">
+          <div class="month-chip" id="chip">June</div>
+          <p class="verse" id="verse"></p>
+          <p class="ref" id="ref"></p>
+          <p class="wisdom" id="wisdom"></p>
+        </article>
+        <div class="actions">
+          <button class="pill-btn ghost" id="another-btn" type="button">Choose another</button>
+          <button class="pill-btn" id="again-btn" type="button">Amen</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    const messages = {
+      January: {
+        verse: "Behold, I will do a new thing; now it shall spring forth.",
+        ref: "Isaiah 43:19",
+        wisdom: "A new year is a reminder that God is not finished with your story. Begin again with hope."
+      },
+      February: {
+        verse: "And now these three remain: faith, hope and love. But the greatest of these is love.",
+        ref: "1 Corinthians 13:13",
+        wisdom: "Love is more than a feeling. It is the courage to stay kind when it would be easier not to."
+      },
+      March: {
+        verse: "To every thing there is a season, and a time to every purpose under the heaven.",
+        ref: "Ecclesiastes 3:1",
+        wisdom: "Do not rush what God is still preparing. Every season has a purpose, even the waiting."
+      },
+      April: {
+        verse: "If anyone is in Christ, the new creation has come: The old has gone, the new is here!",
+        ref: "2 Corinthians 5:17",
+        wisdom: "Spring teaches the soul that buried things can bloom. Let God make something new in you."
+      },
+      May: {
+        verse: "This is the day which the Lord hath made; we will rejoice and be glad in it.",
+        ref: "Psalm 118:24",
+        wisdom: "Gratitude turns an ordinary morning into a gift. Receive today with open hands."
+      },
+      June: {
+        verse: "Let your light so shine before men, that they may see your good works, and glorify your Father which is in heaven.",
+        ref: "Matthew 5:16",
+        wisdom: "You were not made to hide. Shine quietly, steadily, and let your life point others to God."
+      },
+      July: {
+        verse: "But they that wait upon the Lord shall renew their strength; they shall mount up with wings as eagles.",
+        ref: "Isaiah 40:31",
+        wisdom: "Strength is not only in running. It is also in trusting God enough to rest and rise again."
+      },
+      August: {
+        verse: "For I know the thoughts that I think toward you, saith the Lord, thoughts of peace, and not of evil, to give you an expected end.",
+        ref: "Jeremiah 29:11",
+        wisdom: "Your future is not an accident. Walk forward as someone already held in God's good plans."
+      },
+      September: {
+        verse: "And let us not be weary in well doing: for in due season we shall reap, if we faint not.",
+        ref: "Galatians 6:9",
+        wisdom: "Keep planting what is good. Harvests come to those who do not quit in the middle of the work."
+      },
+      October: {
+        verse: "Be still, and know that I am God.",
+        ref: "Psalm 46:10",
+        wisdom: "Peace begins when you stop striving and remember who is in control. Stillness is not weakness."
+      },
+      November: {
+        verse: "In every thing give thanks: for this is the will of God in Christ Jesus concerning you.",
+        ref: "1 Thessalonians 5:18",
+        wisdom: "Thanksgiving is a way of seeing. Look again, and you will find grace even in hard places."
+      },
+      December: {
+        verse: "And the light shineth in darkness; and the darkness comprehended it not.",
+        ref: "John 1:5",
+        wisdom: "Christmas is the promise that light has already come. No night is stronger than God's love."
+      }
+    };
+
+    const ITEM_HEIGHT = 64;
+    let index = 5;
+
+    const list = document.getElementById("month-list");
+    const wheel = document.getElementById("wheel");
+    const pickerScreen = document.getElementById("picker-screen");
+    const wisdomScreen = document.getElementById("wisdom-screen");
+
+    months.forEach((month) => {
+      const li = document.createElement("li");
+      li.textContent = month;
+      list.appendChild(li);
+    });
+
+    function renderPicker() {
+      const centerOffset = (wheel.clientHeight - 320) / 2;
+      list.style.transform = `translateY(${centerOffset - index * ITEM_HEIGHT}px)`;
+      [...list.children].forEach((li, i) => {
+        li.classList.toggle("active", i === index);
+      });
+    }
+
+    function move(step) {
+      index = Math.max(0, Math.min(months.length - 1, index + step));
+      renderPicker();
+    }
+
+    function openMonth(monthIndex) {
+      index = monthIndex;
+      renderPicker();
+      showWisdom();
+    }
+
+    function showWisdom() {
+      const month = months[index];
+      const data = messages[month];
+      document.getElementById("wisdom-title").textContent = month;
+      document.getElementById("chip").textContent = month;
+      document.getElementById("verse").textContent = `“${data.verse}”`;
+      document.getElementById("ref").textContent = data.ref;
+      document.getElementById("wisdom").textContent = data.wisdom;
+      pickerScreen.classList.remove("visible");
+      pickerScreen.hidden = true;
+      pickerScreen.setAttribute("aria-hidden", "true");
+      wisdomScreen.hidden = false;
+      wisdomScreen.classList.add("visible");
+      wisdomScreen.setAttribute("aria-hidden", "false");
+    }
+
+    function showPicker() {
+      wisdomScreen.classList.remove("visible");
+      wisdomScreen.hidden = true;
+      wisdomScreen.setAttribute("aria-hidden", "true");
+      pickerScreen.hidden = false;
+      pickerScreen.classList.add("visible");
+      pickerScreen.setAttribute("aria-hidden", "false");
+    }
+
+    document.getElementById("back-btn").addEventListener("click", showPicker);
+    document.getElementById("another-btn").addEventListener("click", showPicker);
+    document.getElementById("again-btn").addEventListener("click", showPicker);
+
+    list.addEventListener("click", (event) => {
+      const li = event.target.closest("li");
+      if (!li) return;
+      index = [...list.children].indexOf(li);
+      renderPicker();
+    });
+
+    list.addEventListener("dblclick", (event) => {
+      const li = event.target.closest("li");
+      if (!li) return;
+      openMonth([...list.children].indexOf(li));
+    });
+
+    wheel.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      move(event.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+
+    let lastTouchY = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchDistance = 0;
+    let touchMoved = false;
+    let lastTap = null;
+
+    wheel.addEventListener("touchstart", (event) => {
+      const touch = event.touches[0];
+      lastTouchY = touch.clientY;
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchDistance = 0;
+      touchMoved = false;
+    }, { passive: true });
+
+    wheel.addEventListener("touchmove", (event) => {
+      event.preventDefault();
+      const currentY = event.touches[0].clientY;
+      const currentX = event.touches[0].clientX;
+      if (Math.hypot(currentX - touchStartX, currentY - touchStartY) > 10) {
+        touchMoved = true;
+      }
+      touchDistance += lastTouchY - currentY;
+      lastTouchY = currentY;
+
+      while (Math.abs(touchDistance) >= ITEM_HEIGHT / 3) {
+        const step = Math.sign(touchDistance);
+        move(step);
+        touchDistance -= step * (ITEM_HEIGHT / 3);
+      }
+    }, { passive: false });
+
+    wheel.addEventListener("touchend", (event) => {
+      if (touchMoved) {
+        lastTap = null;
+        return;
+      }
+
+      const li = event.target.closest("li");
+      if (!li) return;
+
+      const tappedIndex = [...list.children].indexOf(li);
+      const now = Date.now();
+      if (lastTap && lastTap.index === tappedIndex && now - lastTap.time < 400) {
+        lastTap = null;
+        openMonth(tappedIndex);
+      } else {
+        lastTap = { index: tappedIndex, time: now };
+      }
+    });
+
+    wheel.addEventListener("touchcancel", () => {
+      lastTap = null;
+    });
+
+    renderPicker();
+  </script>
+</body>
+</html>
